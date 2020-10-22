@@ -135,8 +135,8 @@ def encode_sliding_window(data):
 
     features = []
     if not no_padding:
-        sep_token = tokenizer.sep_token_id
-        cls_token = tokenizer.cls_token_id
+        sep_token = tokenizer.sep_token
+        cls_token = tokenizer.cls_token
         pad_token = tokenizer.pad_token_id
 
         for tokens in token_sets:
