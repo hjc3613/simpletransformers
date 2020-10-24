@@ -21,6 +21,7 @@ import logging
 import os
 from io import open
 from multiprocessing import Pool, cpu_count
+import re
 
 from tqdm.auto import tqdm
 
@@ -68,7 +69,8 @@ def read_examples_from_file(data_file, mode):
                     words = []
                     labels = []
             else:
-                splits = line.split(" ")
+                #splits = line.split(" ")
+                splits = re.split(r'\s+', line.strip())
                 words.append(splits[0])
                 if len(splits) > 1:
                     labels.append(splits[-1].replace("\n", ""))
