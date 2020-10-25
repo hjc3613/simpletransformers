@@ -62,7 +62,7 @@ model = LanguageModelingModel(
     "electra",
     args=train_args,
     train_files=train_file,
-    use_cuda=True,
+    use_cuda=False,
     model_name="outputs/checkpoint-120000"
 )
 
