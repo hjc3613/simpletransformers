@@ -341,8 +341,10 @@ class NERModel:
 
                 outputs = model(**inputs)
                 # model outputs are always tuple in pytorch-transformers (see doc)
-                loss = outputs[0]
-
+                loss, logits = outputs[:2]
+                if global_step+1 // 1 == 0:
+                    idx = torch.argmax(logits, dim=-1)
+                    logger.warning('debug: logits', idx)
                 if args["n_gpu"] > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
