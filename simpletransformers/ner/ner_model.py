@@ -52,6 +52,7 @@ from transformers import (
     XLMRobertaTokenizer,
     get_linear_schedule_with_warmup,
 )
+from .electro_crf import ElectroForTokenClassificationCrf
 
 try:
     import wandb
@@ -65,7 +66,7 @@ logger = logging.getLogger(__name__)
 
 class NERModel:
     def __init__(
-        self, model_type, model_name, labels=None, args=None, use_cuda=True, cuda_device=-1, **kwargs,
+        self, model_type, model_name, labels=None, args=None, use_cuda=True, cuda_device=-1, crf=True, **kwargs,
     ):
         """
         Initializes a NERModel
@@ -125,7 +126,7 @@ class NERModel:
             "bert": (BertConfig, BertForTokenClassification, BertTokenizer),
             "camembert": (CamembertConfig, CamembertForTokenClassification, CamembertTokenizer),
             "distilbert": (DistilBertConfig, DistilBertForTokenClassification, DistilBertTokenizer),
-            "electra": (ElectraConfig, ElectraForTokenClassification, ElectraTokenizer),
+            "electra": (ElectraConfig, ElectroForTokenClassificationCrf if crf else ElectraForTokenClassification, ElectraTokenizer),
             "roberta": (RobertaConfig, RobertaForTokenClassification, RobertaTokenizer),
             "xlmroberta": (XLMRobertaConfig, XLMRobertaForTokenClassification, XLMRobertaTokenizer),
         }
@@ -342,9 +343,7 @@ class NERModel:
                 outputs = model(**inputs)
                 # model outputs are always tuple in pytorch-transformers (see doc)
                 loss, logits = outputs[:2]
-                if global_step+1 // 1 == 0:
-                    idx = torch.argmax(logits, dim=-1)
-                    logger.warning('debug: logits', idx)
+
                 if args["n_gpu"] > 1:
                     loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
