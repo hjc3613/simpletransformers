@@ -10,6 +10,7 @@ from multiprocessing import cpu_count
 
 import numpy as np
 from scipy.stats import pearsonr
+import seqeval
 from seqeval.metrics import classification_report, f1_score, precision_score, recall_score
 from tqdm.auto import tqdm, trange
 
@@ -711,12 +712,12 @@ class NERModel:
 
         if split_on_space:
             predict_examples = [
-                InputExample(i, sentence.split(), [self.labels[0] for word in sentence.split()])
+                InputExample(i, sentence.split(), [self.labels[-1] for word in sentence.split()])
                 for i, sentence in enumerate(to_predict)
             ]
         else:
             predict_examples = [
-                InputExample(i, sentence, [self.labels[0] for word in sentence])
+                InputExample(i, sentence, [self.labels[-1] for word in sentence])
                 for i, sentence in enumerate(to_predict)
             ]
 
@@ -779,7 +780,8 @@ class NERModel:
                 if out_label_ids[i, j] != pad_token_label_id:
                     out_label_list[i].append(label_map[out_label_ids[i][j]])
                     preds_list[i].append(label_map[preds[i][j]])
-
+        result = [(origin, seqeval.metrics.sequence_labeling.get_entities(pred)) for origin, pred in zip(to_predict, preds_list)]
+        return result
         if split_on_space:
             preds = [
                 [{word: preds_list[i][j]} for j, word in enumerate(sentence.split()[: len(preds_list[i])])]
@@ -835,9 +837,9 @@ class NERModel:
             if lab != self.pad_token_label_id:
                 if n != 0:
                     word_logits.append(tmp)
-                tmp = [list(masked_logits[n])]
+                tmp = [[masked_logits[n]]]
             else:
-                tmp.append(list(masked_logits[n]))
+                tmp.append([masked_logits[n]])
         word_logits.append(tmp)
 
         return word_logits

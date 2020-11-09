@@ -24,5 +24,5 @@ train_args = {
 
 model = NERModel("electra", "ner_output/checkpoint-150000", args=train_args, labels=labels, use_cuda=True, crf=True)
 
-result = model.predict(['发 烧 头 痛 3 天', '见 盲 肠 底 ， 升 结 肠 近 肝 曲'])
+result = model.predict([list('发烧头痛3天'), list('见盲肠底，升结肠近肝曲')], split_on_space=False)
 print(result)
