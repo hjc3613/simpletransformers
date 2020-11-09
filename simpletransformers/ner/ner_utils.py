@@ -142,11 +142,11 @@ def convert_example_to_feature(example_row):
     # used as as the "sentence vector". Note that this only makes sense because
     # the entire model is fine-tuned.
     tokens += [sep_token]
-    label_ids += [pad_token_label_id]
+    label_ids += [label_map[sep_token]]
     if sep_token_extra:
         # roberta uses an extra separator b/w pairs of sentences
         tokens += [sep_token]
-        label_ids += [pad_token_label_id]
+        label_ids += [label_map[sep_token]]
     segment_ids = [sequence_a_segment_id] * len(tokens)
 
     if cls_token_at_end:
@@ -155,7 +155,7 @@ def convert_example_to_feature(example_row):
         segment_ids += [cls_token_segment_id]
     else:
         tokens = [cls_token] + tokens
-        label_ids = [pad_token_label_id] + label_ids
+        label_ids = [label_map[cls_token]] + label_ids
         segment_ids = [cls_token_segment_id] + segment_ids
 
     input_ids = tokenizer.convert_tokens_to_ids(tokens)

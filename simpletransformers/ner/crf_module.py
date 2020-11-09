@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import torchcrf
 
 class CRF(nn.Module):
     """
@@ -128,7 +127,7 @@ class CRF(nn.Module):
                 Shape of (batch_size,)
         """
         batch_size, seq_length = tags.shape
-        scores = torch.zeros(batch_size)
+        scores = torch.zeros(batch_size).to(self.transitions.device)
 
         # save first and last tags to be used later
         first_tags = tags[:, 0]
@@ -317,3 +316,8 @@ class CRF(nn.Module):
             best_path.insert(0, best_tag)
 
         return best_path
+
+if __name__ == '__main__':
+    crf = CRF(eos_tag_id=2, bos_tag_id=1, nb_labels=7,pad_tag_id=0)
+    emissions = torch.randn(4, 10, 7)
+    print(crf.decode(emissions))

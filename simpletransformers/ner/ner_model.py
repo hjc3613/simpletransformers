@@ -164,7 +164,7 @@ class NERModel:
         self.args["model_name"] = model_name
         self.args["model_type"] = model_type
 
-        self.pad_token_label_id = CrossEntropyLoss().ignore_index
+        self.pad_token_label_id = args['cross_entropy_ignore_index']
 
         if model_type == "camembert":
             warnings.warn(
@@ -340,7 +340,7 @@ class NERModel:
 
                 inputs = self._get_inputs_dict(batch)
 
-                outputs = model(**inputs)
+                outputs = model(**inputs, cross_entropy_ignore_index=self.pad_token_label_id, train_mode=True)
                 # model outputs are always tuple in pytorch-transformers (see doc)
                 loss, logits = outputs[:2]
 
@@ -632,7 +632,7 @@ class NERModel:
                 # XLM and RoBERTa don"t use segment_ids
                 if args["model_type"] in ["bert", "xlnet"]:
                     inputs["token_type_ids"] = batch[2]
-                outputs = model(**inputs)
+                outputs = model(**inputs, cross_entropy_ignore_index=self.pad_token_label_id, train_mode=False)
                 tmp_eval_loss, logits = outputs[:2]
 
                 eval_loss += tmp_eval_loss.mean().item()
@@ -648,7 +648,8 @@ class NERModel:
 
         eval_loss = eval_loss / nb_eval_steps
         model_outputs = preds
-        preds = np.argmax(preds, axis=2)
+        if preds.ndim > 2:
+            preds = np.argmax(preds, 2)
 
         label_map = {i: label for i, label in enumerate(self.labels)}
 
@@ -742,7 +743,7 @@ class NERModel:
                 # XLM and RoBERTa don"t use segment_ids
                 if args["model_type"] in ["bert", "xlnet"]:
                     inputs["token_type_ids"] = batch[2]
-                outputs = model(**inputs)
+                outputs = model(**inputs, cross_entropy_ignore_index=self.pad_token_label_id)
                 tmp_eval_loss, logits = outputs[:2]
 
                 eval_loss += tmp_eval_loss.mean().item()
@@ -764,7 +765,9 @@ class NERModel:
 
         eval_loss = eval_loss / nb_eval_steps
         token_logits = preds
-        preds = np.argmax(preds, axis=2)
+        if preds.ndim > 2:
+            # 如果没接CRF层，返回的形状是(batch_size, sent_length, label_nums)
+            preds = np.argmax(preds, axis=2)
 
         label_map = {i: label for i, label in enumerate(self.labels)}
 

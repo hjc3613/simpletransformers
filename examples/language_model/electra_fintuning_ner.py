@@ -31,11 +31,13 @@ train_args = {
     "use_cached_eval_features":True,
     "fp16":False,
     "num_train_epochs": 10,
-    "evaluate_during_training_steps":1,
+    "evaluate_during_training_steps":10000,
     "train_batch_size": 32,
+    'cross_entropy_ignore_index':0,
+    'classification_report':True
 }
 
-model = NERModel("electra", "outputs/best_model", args=train_args, labels=labels, use_cuda=True, crf=True)
+model = NERModel("electra", "discriminator_trained/discriminator_model", args=train_args, labels=labels, use_cuda=True, crf=True)
 
 # Train the model
 model.train_model(train_file, eval_data=eval_file)
