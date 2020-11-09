@@ -16,10 +16,13 @@ train_args = {
     "use_cached_eval_features":True,
     "fp16":False,
     "num_train_epochs": 10,
-    "evaluate_during_training_steps":20000,
+    "evaluate_during_training_steps":10000,
+    "train_batch_size": 32,
+    'cross_entropy_ignore_index':0,
+    'classification_report':True
 }
 
-model = NERModel("electra", "ner_output/checkpoint-260000", args=train_args, labels=labels, use_cuda=True, crf=True)
+model = NERModel("electra", "ner_output/checkpoint-150000", args=train_args, labels=labels, use_cuda=True, crf=True)
 
 result = model.predict(['发 烧 头 痛 3 天', '见 盲 肠 底 ， 升 结 肠 近 肝 曲'])
 print(result)
